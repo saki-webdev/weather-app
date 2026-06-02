@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>天気アプリ</title>
+    <style>
+
+        body {
+            font-family: sans-serif;
+
+            background: linear-gradient(135deg, #f5f5f5, #dddddd);
+            background-attachment: fixed;
+
+            min-height: 100dvh;
+
+            transition: all 1s ease;
+
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            letter-spacing: 0.5px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .container {
+            width: calc(100% - 40px);
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            box-sizing: border-box;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+
+            position: relative;
+            z-index: 10;
+
+            transition: 
+                background 0.5s ease,
+                box-shadow 0.5s ease;
+        }
+
+        .search {
+            display: flex;
+            gap: 10px;
+        }
+
+        #searchBtn {
+            width: 90px;
+        }
+
+        input {
+            flex: 1;
+            min-width: 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
+            transition: 
+                background 0.5s ease,
+                color 0.5s ease,
+                border-color 0.5s ease;
+        }
+        
+        button {
+            padding: 10px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            
+            transition: 0.5s;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        button:active {
+            transform: translateY(1px) 
+            scale(0.97);
+        }
+
+        .card {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+
+            opacity: 1;
+            transform: translateX(0);
+
+            transition: 
+                opacity 0.5s ease,
+                transform 0.5s ease,
+                background 0.5s ease;
+        }
+
+        .fade-hidden {
+            opacity: 0;
+            transform: translateX(20px);
+            pointer-events: none;
+        }
+
+        #weatherIcon {
+            width: 100px;
+            height: 100px;
+            display: none;
+            margin: 10px auto;
+        }
+
+        .sunny-icon {
+            animation: float 2s ease-in-out infinite;
+        }
+        .rainy-icon {
+            animation: shake 0.4s infinite;
+        }
+        .snowy-icon {
+            animation: snowy 3s ease-in-out infinite;
+        }
+        .cloudy-icon {
+            animation: cloudy 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        @keyframes shake {
+            0% {transform: translateX(0); }
+            25% {transform: translateX(-2px); }
+            50% {transform: translateX(2px); }
+            75% {transform: translateX(-2px); }
+            100% {transform: translateX(0); }
+        }
+
+        @keyframes snowy {
+            0%, 100% {
+                transform: translateX(0) translateY(0);
+            }
+
+            50% {
+                transform: translateX(8px) translateY(-4px);
+            }
+        }
+            
+        @keyframes cloudy {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-3px);
+            }
+        }
+        
+        .rain {
+            position: fixed;
+            top: -20px;
+            width: 2px;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.6);
+
+            animation: rainFall linear infinite;
+            pointer-events: none;
+        }
+
+        #rainLayer {
+            position: fixed;
+            inset: 0;
+
+            pointer-events: none;
+
+            z-index: 0;
+        }
+
+        @keyframes rainFall {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(110vh);
+            }
+        }
+
+        .sun-particle {
+            position: fixed;
+
+            width: 12px;
+            height: 12px;
+
+            background: rgba(255, 255, 255, 0.7);
+
+            border-radius: 50%;
+
+            box-shadow: 
+            0 0 10px rgba(255, 255, 255, 0.8),
+            0 0 20px rgba(255, 255, 120, 0.6);
+
+            animation: floatSun linear infinite;
+
+            pointer-events: none;
+        }
+
+        #sunLayer {
+            position: fixed;
+            inset: 0;
+
+            pointer-events: none;
+
+            z-index: 0;
+        }
+
+        @keyframes floatSun {
+
+            from {
+                transform:
+                translateY(100vh)
+                translateX(0);
+            }
+
+            to {
+                transform: 
+                translateY(-10vh)
+                translateX(30px);
+            }
+        }
+
+        .cloud {
+            position: fixed;
+
+            width: 240px;
+            height: 90px;
+
+            background: rgba(255, 255, 255, 1);
+
+            border-radius: 999px;
+
+            filter: blur(10px);
+
+            animation: cloudMove linear infinite;
+
+            pointer-events: none;
+
+            box-shadow: 
+                30px -10px 0 5px rgba(255, 255, 255, 1),
+                50px -5px 10 12px rgba(255, 255, 255, 1),
+                110px 5px 0 15px rgba(255, 255, 255, 1),
+                80px 8px 0 18px rgba(255, 255, 255, 1),
+                -20px -15px 0 15px rgba(255, 255, 255, 1);
+
+            opacity: 1;
+        }
+
+        .cloud::before,
+        .cloud::after {
+            content: "";
+
+            position: absolute;
+
+            background: inherit;
+
+            border-radius: 50%;
+        }
+
+        .cloud::before {
+            width: 150px;
+            height: 90px;
+
+            top: -24px;
+            left: 84px;
+        }
+
+        .cloud::after {
+            width: 150px;
+            height: 90px;
+
+            bottom: -24px;
+            left: -6px;
+        }
+
+        #cloudLayer {
+            position: fixed;
+            inset: 0;
+
+            pointer-events: none;
+
+            z-index: 0;
+        }
+
+        @keyframes cloudMove {
+
+            from {
+                transform:
+                translateX(-400px)
+                rotate(5deg)
+                scale(var(--scale));
+            }
+
+            to {
+                transform: 
+                translateX(calc(110vw + 500px))
+                rotate(5deg)
+                scale(var(--scale));
+            }
+        }
+
+        .flipped {
+            transform: scaleX(-1);
+        }
+
+        .snow {
+            position: fixed;
+
+            width: 10px;
+            height: 10px;
+
+            background: white;
+
+            border-radius: 50%;
+
+            opacity: 0.8;
+
+            filter: blur(1px);
+
+            animation: snowFall linear infinite;
+
+            pointer-events: none;
+        }
+
+        #snowLayer {
+            position: fixed;
+            inset: 0;
+
+            pointer-events: none;
+
+            z-index: 0;
+        }
+
+        @keyframes snowFall {
+
+            from {
+                transform:
+                translateY(-10vh)
+                translateX(0);
+            }
+
+            to {
+                transform: 
+                translateY(110vh)
+                translateX(80px);
+            }
+        }
+
+        #lightningLayer {
+            position: fixed;
+            inset: 0;
+
+            background: white;
+
+            opacity: 0;
+
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .flash {
+            animation: lightningFlash 0.25s ease;
+        }
+
+        @keyframes lightningFlash {
+
+            0% {
+                opacity: 0;
+                        }
+
+            20% {
+                opacity: 0.9;
+                        }
+
+            100% {
+                opacity: 0;
+                        }
+        }
+            
+       .datetime {
+            color: #666;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+
+        .datetime p {
+            margin: 2px 0;
+        }
+
+        body.dark  {
+            background: #1e1e1e;
+            color: white;
+        }
+
+        body.dark .container {
+            background: rgba(40, 40, 40, 0.95);
+        }
+
+        body.dark .card {
+            background: #3a3a3a;
+        }
+
+        body.dark input {
+            background: #444;
+            color: white;
+            border: 1px solid #666;
+        }
+
+        body.dark input::placeholder {
+            color: #bbb;
+        }
+
+        body.dark #currentDate,
+        body.dark #currentTime {
+            color: #ccc;
+        }
+
+        body.dark #themeBtn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            box-shadow: 
+                0 0 10px rgba(255, 255, 255, 0.6),
+                0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        #themeBtn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+
+            padding: 10px;
+
+            border: none;
+            border-radius: 999px;
+
+            background: #444;
+            color: white;
+
+            cursor: pointer;
+
+            transition: 0.5s;
+        }
+
+        .loading {
+            width: 40px;
+            height: 40px;
+
+            border: 4px solid #ddd;
+            border-top: 4px solid #28a745;
+            border-radius: 50%;
+
+            animation: spin 0.8s linear infinite;
+
+            display: none;
+            margin: 0 auto;            
+        }
+
+        .loading.show {
+            display: block;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                font-size: 14px;
+            }
+
+            .container {
+                width: calc(100% - 24px);
+                margin: 12px auto;
+                padding: 20px;
+            }
+
+            .search {
+                flex-direction: column;
+            }
+
+            #searchBtn {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            #weatherIcon {
+                width: 80px;
+                height: 80px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            #themeBtn {
+                top: 12px;
+                right: 12px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div id="sunLayer"></div>
+    <div id="rainLayer"></div>
+    <div id="cloudLayer"></div>
+    <div id="snowLayer"></div>
+    <div id="lightningLayer"></div>
+
+    <div class="container">
+
+        <button id="themeBtn">🌙</button>
+
+        <h1>天気アプリ</h1>
+
+        <div class="search">
+            <input id="cityInput" list="historyList" type="text" placeholder="都市名を入力">
+
+            <datalist id="historyList"></datalist>
+
+            <button id="searchBtn" onclick="getWeather()">検索</button>
+
+        </div>
+
+        <p id="message"></p>
+        <div id="loading" class="loading"></div>
+
+        <div class="datetime">
+            <p id="currentDate"></p>
+            <p id="currentTime"></p>
+        </div>
+
+        <div id="weatherResult" class="card fade-hidden">
+            <img id="weatherIcon">
+            <h2 id="cityName"></h2>
+            <p id="temp"></p>
+            <p id="desc"></p>
+            <p id="humidity"></p>
+            <p id="wind"></p>
+        </div>
+    </div>
+
+    <script>
+
+        const API_KEY = "YOUR_API_KEY";
+
+        let currentWeather = "";
+
+        function updateBackground(weather) {
+
+            if (weather === "Clear") {
+                document.body.style.background = "linear-gradient(135deg, #87ceeb, #ffe29f)";
+            } else if (weather === "Rain") {
+                document.body.style.background = "linear-gradient(135deg, #4b6cb7, #182848)";
+            } else if (weather === "Snow") {
+                document.body.style.background = "linear-gradient(135deg, #dfe9f3, #ffffff)";
+            } else if (weather === "Clouds") {
+                document.body.style.background = "linear-gradient(135deg, #bdc3c7, #2c3e50)";
+            } else if (weather === "Thunderstorm") {
+                document.body.style.background = "linear-gradient(135deg, #4b6cb7, #182848)";
+            } else {
+                document.body.style.background = "linear-gradient(135deg, #f5f5f5, #dddddd)";
+            }
+        }
+        
+        function getWeather() {
+
+            const loading = document.getElementById("loading");
+            const weatherResult = document.getElementById("weatherResult");
+            const message = document.getElementById("message");
+            const button = document.getElementById("searchBtn");
+            const city = document.getElementById("cityInput").value.trim();
+
+            if(!city) {
+                document.getElementById("cityInput").focus();
+                return;
+            }
+
+            weatherResult.classList.add("fade-hidden");
+
+            setTimeout(() => {
+
+                fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric&lang=ja`)
+                .then(res => res.json())
+                .then(data => {
+
+                    if (data.cod == 404) {
+
+                        loading.classList.remove("show");
+
+                        message.textContent = "都市が見つかりません";
+
+                        removeHistory(city);
+
+                        document.getElementById("weatherResult").classList.add("fade-hidden");
+
+                        button.disabled = false;
+
+                        button.textContent = "検索";
+
+                        document.getElementById("weatherIcon").style.display ="none";
+
+                        document.getElementById("cityInput").value = "";
+
+                        document.getElementById("cityInput").focus();
+
+                        return;
+                    }
+
+                    if (data.cod == 401) {
+                        loading.classList.remove("show");
+                        button.disabled = false;
+                        button.textContent = "検索";
+                        message.textContent = "APIキーが無効です";
+                        return;
+                    }
+
+                    if (data.cod != 200) {
+                        loading.classList.remove("show");
+                        message.textContent = "天気情報を取得できません";
+                        button.disabled = false;
+                        button.textContent = "検索";
+                        return;
+                    }         
+
+                    const icon = data.weather[0].icon;
+
+                    const weather = data.weather[0].main;
+                    // const weather = "Thunderstorm";
+
+                    currentWeather = weather;
+
+                    removeRain();
+                    removeSunEffect();
+                    removeClouds();
+                    removeSnow();
+                    stopLightning();
+
+                    if (weather === "Rain") {
+                        createRain();
+                    }
+
+                    if (weather === "Clear") {
+                        createSunEffect();
+                    }
+
+                    if (weather === "Clouds") {
+                        createClouds();
+                    }
+
+                    if (weather === "Snow") {
+                        createSnow();
+                    }
+
+                    if (weather === "Thunderstorm") {
+                        createRain();
+                        startLightning();
+                    }
+
+                    if (!document.body.classList.contains("dark")) {     
+                        updateBackground(weather);
+                    }
+
+                    const weatherIcon = document.getElementById("weatherIcon");
+
+                    weatherIcon.classList.remove("sunny-icon", "rainy-icon", "snowy-icon", "cloudy-icon");
+
+                    if (weather === "Clear") {
+                        weatherIcon.classList.add("sunny-icon");
+                    } else if (weather === "Rain") {
+                        weatherIcon.classList.add("rainy-icon");
+                    } else if (weather === "Snow") {
+                        weatherIcon.classList.add("snowy-icon");
+                    } else if (weather === "Clouds") {
+                        weatherIcon.classList.add("cloudy-icon") 
+                    } else if (weather === "Thunderstorm") {
+                        weatherIcon.classList.add("rainy-icon");
+                    } 
+
+                    const imgUrl = `https://openweathermap.org/img/wn/${icon}@4x.png`;
+
+                    weatherIcon.src = imgUrl;
+
+                    weatherIcon.style.display = "block";
+
+                    message.textContent = "";
+
+                    document.getElementById("cityName").textContent = data.name;
+                    document.getElementById("temp").textContent = "気温：" + data.main.temp + "℃";
+                    document.getElementById("desc").textContent = "天気：" + data.weather[0].description;
+                    document.getElementById("humidity").textContent = "湿度：" + data.main.humidity + "%";
+                    document.getElementById("wind").textContent = "風速：" + data.wind.speed + "m/s";
+
+                    setTimeout(() => {
+                        weatherResult.classList.remove("fade-hidden");
+                    }, 400);
+
+                    document.getElementById("cityInput").value = "";
+
+                    document.getElementById("cityInput").focus();
+                
+                    saveHistory(city);
+
+                    loading.classList.remove("show");
+
+                    button.disabled = false;
+
+                    button.textContent = "検索";
+
+                })
+
+                .catch(() => {
+
+                    loading.classList.remove("show");
+
+                    message.textContent = "エラーが発生しました";
+
+                    document.getElementById("weatherResult").classList.add("fade-hidden");
+
+                    button.disabled = false;
+
+                    button.textContent = "検索";
+                });
+
+            }, 500);
+            
+            loading.classList.add("show");
+
+            button.disabled = true;
+
+            button.textContent = "検索中...";
+
+        }
+    
+        document.getElementById("cityInput").addEventListener("keydown", function(e) {
+            if (e.key === "Enter") {
+                getWeather();
+            }
+        });
+
+        document.getElementById("cityInput").addEventListener("change", function() {
+
+            const history = JSON.parse(localStorage.getItem("history")) || [];
+
+            if (history.includes(this.value)) {
+                getWeather();
+            }
+        });
+
+        function saveHistory(city) {
+            
+            let history = JSON.parse(localStorage.getItem("history")) || [];
+
+            history = history.filter(item => item !== city);
+
+            history.unshift(city);
+
+            history = history.slice(0, 10);
+
+            localStorage.setItem("history", JSON.stringify(history));
+
+            renderHistory();
+        }
+
+        function removeHistory(city) {
+
+            let history = JSON.parse(localStorage.getItem("history")) || [];
+
+            history = history.filter(item => item !== city);
+
+            localStorage.setItem("history", JSON.stringify(history));
+
+            renderHistory();
+
+        }
+
+        function renderHistory() {
+
+            const historyList = document.getElementById("historyList");
+
+            historyList.innerHTML = "";
+
+            const history = JSON.parse(localStorage.getItem("history")) || [];
+
+            history.forEach(city => {
+
+                const option = document.createElement("option");
+
+                option.value = city;
+
+                historyList.appendChild(option);
+
+            });
+        }
+
+        function updateTime() {
+
+            const now = new Date();
+
+            const date = now.toLocaleDateString("ja-JP", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                weekday: "short"
+            });
+
+            const time = now.toLocaleTimeString("ja-JP");
+
+            document.getElementById("currentDate").textContent = date;
+
+            document.getElementById("currentTime").textContent = 
+                "現在時刻：" + time;
+        }
+
+        setInterval(updateTime, 1000);
+
+        updateTime();
+
+        function createRain() {
+
+            removeRain();
+
+            for (let i = 0; i < 80; i++) {
+
+                const rain = document.createElement("div");
+
+                rain.classList.add("rain");
+
+                rain.style.left = Math.random() * 100 + "vw";
+
+                rain.style.animationDuration = 
+                    0.5 + Math.random() *0.5 + "s";
+
+                    rain.style.opacity = 0.3 + Math.random() * 0.7;
+
+                    document.getElementById("rainLayer").appendChild(rain);
+            }
+        }
+
+        function removeRain() {
+            document.querySelectorAll(".rain").forEach(r => r.remove());
+        }
+
+        function createSunEffect() {
+
+            removeSunEffect();
+
+            for (let i = 0; i < 40; i++) {
+
+                const sun = document.createElement("div");
+
+                sun.classList.add("sun-particle");
+
+                sun.style.left = Math.random() * 100 + "vw";
+
+                sun.style.animationDuration = 
+                    6 + Math.random() *6 + "s";
+
+                sun.style.opacity = 0.3 + Math.random() * 0.7;
+
+                sun.style.transform = `scale(${0.5 + Math.random()})`;
+
+                document.getElementById("sunLayer").appendChild(sun);
+            }
+        }
+
+        function removeSunEffect() {
+            document.querySelectorAll(".sun-particle").forEach(s => s.remove());
+        }
+
+        function createClouds() {
+
+            removeClouds();
+
+            for (let i = 0; i < 6; i++) {
+
+                const cloud = document.createElement("div");
+
+                cloud.classList.add("cloud");
+
+                cloud.style.top = Math.random() * 60 + "vh";
+                cloud.style.left = -400 + Math.random() * 300 + "px";
+
+                cloud.style.animationDuration = 
+                    20 + Math.random() *20 + "s";
+
+                const scale = 0.8 + Math.random() * 1.5;
+
+                cloud.style.opacity = 0.2 + (scale * 0.2);
+
+                cloud.style.setProperty("--scale", scale);
+
+                cloud.style.animationDuration = 40 - scale * 10 + "s";
+
+                if (Math.random() > 0.5) {
+                    cloud.classList.add("flipped");
+                }
+
+                document.getElementById("cloudLayer").appendChild(cloud);
+            }
+        }
+
+        function removeClouds() {
+            document.querySelectorAll(".cloud").forEach(c => c.remove());
+        }
+
+        let lightningInterval;
+
+        function startLightning() {
+            
+            stopLightning();
+
+            lightningInterval = setInterval(() => {
+
+                if (Math.random() < 0.35) {
+
+                    const layer = 
+                        document.getElementById("lightningLayer");
+
+                    layer.classList.add("flash");
+
+                    setTimeout(() => {
+                        layer.classList.remove("flash");
+                    }, 300);
+                }
+            }, 2000);
+        }
+
+        function stopLightning() {
+            clearInterval(lightningInterval);
+
+            document
+                .getElementById("lightningLayer")
+                .classList.remove("flash");
+        }
+
+        function createSnow() {
+
+            removeSnow();
+
+            for (let i = 0; i < 60; i++) {
+
+                const snow = document.createElement("div");
+
+                snow.classList.add("snow");
+
+                snow.style.left = Math.random() * 100 + "vw";
+
+                snow.style.animationDuration = 
+                    5 + Math.random() *8 + "s";
+
+                snow.style.opacity = 0.3 + Math.random() * 0.7;
+
+                const size = 4 + Math.random() * 10;
+
+                snow.style.width = size + "px";
+                snow.style.height = size + "px";
+
+                document.getElementById("snowLayer").appendChild(snow);
+            }
+        }
+
+        function removeSnow() {
+            document.querySelectorAll(".snow").forEach(s => s.remove());
+        }
+
+        window.onload = function() {
+
+            renderHistory();
+
+            const savedTheme = localStorage.getItem("theme");
+
+            if (savedTheme === "dark") {
+
+                document.body.classList.add("dark");
+
+                document.body.style.background = "#1e1e1e";
+
+                themeBtn.textContent = "☀️";
+
+            }
+
+            document.getElementById("cityInput").focus();
+        };
+
+        const themeBtn = document.getElementById("themeBtn");
+
+        themeBtn.addEventListener("click", function() {
+
+            document.body.classList.toggle("dark");
+
+            if (document.body.classList.contains("dark")) {
+
+                document.body.style.background = "#1e1e1e";
+
+                themeBtn.textContent = "☀️";
+
+                localStorage.setItem("theme", "dark");
+
+            } else {
+
+                themeBtn.textContent ="🌙";
+
+                localStorage.setItem("theme", "light");
+
+                updateBackground(currentWeather);
+
+            }
+
+            document.getElementById("cityInput").focus();
+
+        });
+
+    </script>
+</body>
+</html>
