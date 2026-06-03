@@ -3,6 +3,7 @@
 JavaScriptを使って天気アプリを作成しました。
 都市名を入力すると、OpenWeather APIから天気情報を取得し、現在の天気を表示します。
 
+
 ## URL
 
 https://saki-webdev.github.io/weather-app/
@@ -11,19 +12,21 @@ https://saki-webdev.github.io/weather-app/
 そのため現在は天気情報を取得できません。
 ローカル環境では天気情報の取得・表示まで正常に動作確認済みです。
 
+
 ## 参考画像
 
 ### 通常表示
 
-![Weather App](images/weather-sunny.png)
+
 
 ### 雨天時
 
-![Weather App](images/weather-rain.png)
+
 
 ### ダークモード
 
-![Weather App](images/weather-dark.png)
+
+
 
 ## 機能
 
@@ -37,6 +40,7 @@ https://saki-webdev.github.io/weather-app/
 * 天候ごとの背景アニメーション
 （晴れ / 雨 / 曇り / 雪 / 雷雨）
 
+
 ## 使用技術
 
 * HTML
@@ -46,11 +50,13 @@ https://saki-webdev.github.io/weather-app/
 * localStorage
 * GitHub Pages
 
+
 ## 工夫した点
 
 * 天候ごとの背景色やアニメーションを設定し、天気を視覚的にも楽しめるようにしました。
 * 検索履歴を保存し、再検索しやすくしました。
 * ダークモードを実装し、利用環境に応じて見やすく切り替えられるようにしました。
+
 
 ## 今後追加したい機能
 
