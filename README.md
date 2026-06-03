@@ -15,15 +15,15 @@ https://saki-webdev.github.io/weather-app/
 
 ### 通常表示
 
-![Sunny](./images/weather-sunny.png)
+![Sunny](./images/weather-sunny.jpg)
 
 ### 雨天時
 
-![Rain](./images/weather-rain.png)
+![Rain](./images/weather-rain.jpg)
 
 ### ダークモード
 
-![Dark mode](./images/weather-dark.png)
+![Dark mode](./images/weather-dark.jpg)
 
 ## 機能
 
